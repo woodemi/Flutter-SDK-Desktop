@@ -31,12 +31,9 @@ flutter:
   # However, it is required in order to declare macOS support.
   plugin:
     platforms:
-      android:
-        package: com.example.agora_rtc_engine
-        pluginClass: AgoraRtcEnginePlugin
-      ios:
-        pluginClass: AgoraRtcEnginePlugin
       macos:
+        pluginClass: AgoraRtcEnginePlugin
+      windows:
         pluginClass: AgoraRtcEnginePlugin
 
   # To add assets to your plugin package, add an assets section, like this:
