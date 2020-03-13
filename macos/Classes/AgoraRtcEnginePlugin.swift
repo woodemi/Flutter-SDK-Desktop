@@ -36,6 +36,14 @@ public class AgoraRtcEnginePlugin: NSObject, FlutterPlugin {
     case "leaveChannel":
       let success = agoraRtcEngine?.leaveChannel() == 0
       result(success)
+    case "muteLocalAudioStream":
+      let muted = params?["muted"] as! Bool
+      agoraRtcEngine?.muteLocalAudioStream(muted)
+      result(nil)
+    case "muteAllRemoteAudioStreams":
+      let muted = params?["muted"] as! Bool
+      agoraRtcEngine?.muteAllRemoteAudioStreams(muted)
+      result(nil)
     default:
       result(FlutterMethodNotImplemented)
     }

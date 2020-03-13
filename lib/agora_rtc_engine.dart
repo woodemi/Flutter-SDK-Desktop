@@ -46,4 +46,16 @@ class AgoraRtcEngine {
     final bool success = await _channel.invokeMethod('leaveChannel');
     return success;
   }
+
+  /// Sends/Stops sending the local audio stream.
+  ///
+  /// When muted is set as true, this method does not disable the microphone and thus does not affect any ongoing recording.
+  static Future<void> muteLocalAudioStream(bool muted) async {
+    await _channel.invokeMethod('muteLocalAudioStream', {'muted': muted});
+  }
+
+  /// Receives/Stops receiving all remote audio streams.
+  static Future<void> muteAllRemoteAudioStreams(bool muted) async {
+    await _channel.invokeMethod('muteAllRemoteAudioStreams', {'muted': muted});
+  }
 }
