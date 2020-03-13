@@ -22,6 +22,10 @@ public class AgoraRtcEnginePlugin: NSObject, FlutterPlugin {
       let appId = params["appId"] as! String
       agoraRtcEngine = AgoraRtcEngineKit.sharedEngine(withAppId: appId, delegate: self)
       result(nil)
+    case "setChannelProfile":
+      let profile = params["profile"] as! Int
+      agoraRtcEngine?.setChannelProfile(AgoraChannelProfile(rawValue: profile)!)
+      result(nil)
     default:
       result(FlutterMethodNotImplemented)
     }

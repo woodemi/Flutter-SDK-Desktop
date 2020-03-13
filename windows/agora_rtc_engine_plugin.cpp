@@ -102,6 +102,12 @@ namespace {
             agoraRtcEngine->initialize(ctx);
             result->Success(nullptr);
         }
+        else if ("setChannelProfile" == methodName)
+        {
+            auto profile = params[EncodableValue("profile")].IntValue();
+            agoraRtcEngine->setChannelProfile(static_cast<CHANNEL_PROFILE_TYPE>(profile));
+            result->Success(nullptr);
+        }
         else
             result->NotImplemented();
     }
