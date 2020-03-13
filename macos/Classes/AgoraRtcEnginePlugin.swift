@@ -67,4 +67,45 @@ extension AgoraRtcEnginePlugin: AgoraRtcEngineDelegate {
   public func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
     sendEvent("onUserOffline", params: ["uid": uid, "reason": reason])
   }
+
+  public func rtcEngine(_ engine: AgoraRtcEngineKit, reportRtcStats stats: AgoraChannelStats) {
+    sendEvent("onRtcStats", params: [
+      "totalDuration": stats.duration,
+      "txBytes": stats.txBytes,
+      "rxBytes": stats.rxBytes,
+      "txAudioBytes": stats.txAudioBytes,
+      "txVideoBytes": stats.txVideoBytes,
+      "rxAudioBytes": stats.rxAudioBytes,
+      "rxVideoBytes": stats.rxVideoBytes,
+      "txKBitrate": stats.txKBitrate,
+      "rxKBitrate": stats.rxKBitrate,
+      "txAudioKBitrate": stats.txAudioKBitrate,
+      "rxAudioKBitrate": stats.rxAudioKBitrate,
+      "txVideoKBitrate": stats.txVideoKBitrate,
+      "rxVideoKBitrate": stats.rxVideoKBitrate,
+      "lastmileDelay": stats.lastmileDelay,
+      "txPacketLossRate": stats.txPacketLossRate,
+      "rxPacketLossRate": stats.rxPacketLossRate,
+      "users": stats.userCount,
+      "cpuAppUsage": stats.cpuAppUsage,
+      "cpuTotalUsage": stats.cpuTotalUsage,
+    ])
+  }
+
+  public func rtcEngine(_ engine: AgoraRtcEngineKit, remoteAudioStats stats: AgoraRtcRemoteAudioStats) {
+    sendEvent("onRemoteAudioStats", params: [
+      "stats": [
+        "uid": stats.uid,
+        "quality": stats.quality,
+        "networkTransportDelay": stats.networkTransportDelay,
+        "jitterBufferDelay": stats.jitterBufferDelay,
+        "audioLossRate": stats.audioLossRate,
+        "numChannels": stats.numChannels,
+        "receivedSampleRate": stats.receivedSampleRate,
+        "receivedBitrate": stats.receivedBitrate,
+        "totalFrozenTime": stats.totalFrozenTime,
+        "frozenRate": stats.frozenRate,
+      ]
+    ])
+  }
 }
