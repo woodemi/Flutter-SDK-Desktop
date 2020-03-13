@@ -36,5 +36,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initAgoraRtcEngine() async {
     AgoraRtcEngine.create(agoraAppId);
+
+    AgoraRtcEngine.setChannelProfile(ChannelProfile.Communication);
   }
 }
