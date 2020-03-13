@@ -58,6 +58,15 @@ class AgoraRtcEngine {
     _addEventChannelHandler();
   }
 
+  /// Destroys the RtcEngine instance and releases all resources used by the Agora SDK.
+  ///
+  /// This method is useful for apps that occasionally make voice or video calls, to free up resources for other operations when not making calls.
+  /// Once the app calls destroy to destroy the created RtcEngine instance, you cannot use any method or callback in the SDK.
+  static Future<void> destroy() async {
+    await _removeEventChannelHandler();
+    await _channel.invokeMethod('destroy');
+  }
+
   /// Sets the channel profile.
   ///
   /// RtcEngine needs to know the application scenario to set the appropriate channel profile to apply different optimization methods.
