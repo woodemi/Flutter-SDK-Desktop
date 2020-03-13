@@ -124,6 +124,18 @@ namespace {
             auto ret = EncodableValue(success);
             result->Success(&ret);
         }
+        else if ("muteLocalAudioStream" == methodName)
+        {
+            auto muted = params[EncodableValue("muted")].BoolValue();
+            agoraRtcEngine->muteLocalAudioStream(muted);
+            result->Success(nullptr);
+        }
+        else if ("muteAllRemoteAudioStreams" == methodName)
+        {
+            auto muted = params[EncodableValue("muted")].BoolValue();
+            agoraRtcEngine->muteAllRemoteAudioStreams(muted);
+            result->Success(nullptr);
+        }
         else
             result->NotImplemented();
     }
