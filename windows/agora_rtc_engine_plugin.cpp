@@ -89,7 +89,7 @@ namespace {
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result)
     {
         auto methodName = method_call.method_name();
-        auto params = method_call.arguments()->MapValue();
+        auto params = method_call.arguments() != nullptr ? method_call.arguments()->MapValue() : EncodableMap();
         DebugPrintLine("plugin HandleMethodCall " + methodName + ", args: " + std::to_string(params.size()));
 
         if ("create" == methodName)
@@ -107,6 +107,22 @@ namespace {
             auto profile = params[EncodableValue("profile")].IntValue();
             agoraRtcEngine->setChannelProfile(static_cast<CHANNEL_PROFILE_TYPE>(profile));
             result->Success(nullptr);
+        }
+        else if ("joinChannel" == methodName)
+        {
+            auto token = params.count(EncodableValue("token")) > 0 ? params[EncodableValue("token")].StringValue() : "";
+            auto channelId = params[EncodableValue("channelId")].StringValue();
+            auto info = params.count(EncodableValue("info")) > 0 ? params[EncodableValue("info")].StringValue() : "";
+            auto uid = params[EncodableValue("uid")].IntValue();
+            agoraRtcEngine->joinChannel(token.c_str(), channelId.c_str(), info.c_str(), uid);
+            auto ret = EncodableValue(true);
+            result->Success(&ret);
+        }
+        else if ("leaveChannel" == methodName)
+        {
+            auto success = agoraRtcEngine->leaveChannel() == 0;
+            auto ret = EncodableValue(success);
+            result->Success(&ret);
         }
         else
             result->NotImplemented();
