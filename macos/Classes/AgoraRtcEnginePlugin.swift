@@ -25,6 +25,10 @@ public class AgoraRtcEnginePlugin: NSObject, FlutterPlugin {
       let appId = params?["appId"] as! String
       agoraRtcEngine = AgoraRtcEngineKit.sharedEngine(withAppId: appId, delegate: self)
       result(nil)
+    case "destroy":
+      agoraRtcEngine = nil
+      AgoraRtcEngineKit.destroy()
+      result(nil)
     case "setChannelProfile":
       let profile = params?["profile"] as! Int
       agoraRtcEngine?.setChannelProfile(AgoraChannelProfile(rawValue: profile)!)
