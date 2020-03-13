@@ -123,6 +123,12 @@ namespace {
             agoraRtcEngine->initialize(ctx);
             result->Success(nullptr);
         }
+        else if ("destroy" == methodName)
+        {
+            agoraRtcEngine->release();
+            agoraRtcEngine = nullptr;
+            result->Success(nullptr);
+        }
         else if ("setChannelProfile" == methodName)
         {
             auto profile = params[EncodableValue("profile")].IntValue();
