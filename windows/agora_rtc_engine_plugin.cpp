@@ -51,6 +51,8 @@ namespace {
 #pragma region IRtcEngineEventHandler
     	void onUserJoined(uid_t uid, int elapsed) override;
         void onUserOffline(uid_t uid, USER_OFFLINE_REASON_TYPE reason) override;
+        void onRtcStats(const RtcStats& stats) override;
+        void onRemoteAudioStats(const RemoteAudioStats& stats) override;
 #pragma endregion
 
     private:
@@ -174,6 +176,51 @@ namespace {
             {EncodableValue("uid"), EncodableValue((int)uid)},
             {EncodableValue("reason"), EncodableValue((int)reason)},
         });
+    }
+
+    void AgoraRtcEnginePlugin::onRtcStats(const RtcStats& stats)
+    {
+        SendEvent("onRtcStats", EncodableMap{
+            {EncodableValue("stats"), EncodableValue(EncodableMap{
+                {EncodableValue("totalDuration"), EncodableValue((int)stats.duration)},
+                {EncodableValue("txBytes"), EncodableValue((int)stats.txBytes)},
+                {EncodableValue("rxBytes"), EncodableValue((int)stats.rxBytes)},
+                {EncodableValue("txAudioBytes"), EncodableValue((int)stats.txAudioBytes)},
+                {EncodableValue("txVideoBytes"), EncodableValue((int)stats.txVideoBytes)},
+                {EncodableValue("rxAudioBytes"), EncodableValue((int)stats.rxAudioBytes)},
+                {EncodableValue("rxVideoBytes"), EncodableValue((int)stats.rxVideoBytes)},
+                {EncodableValue("txKBitrate"), EncodableValue((int)stats.txKBitRate)},
+                {EncodableValue("rxKBitrate"), EncodableValue((int)stats.rxKBitRate)},
+                {EncodableValue("txAudioKBitrate"), EncodableValue((int)stats.txAudioKBitRate)},
+                {EncodableValue("rxAudioKBitrate"), EncodableValue((int)stats.rxAudioKBitRate)},
+                {EncodableValue("txVideoKBitrate"), EncodableValue((int)stats.txVideoKBitRate)},
+                {EncodableValue("rxVideoKBitrate"), EncodableValue((int)stats.rxVideoKBitRate)},
+                {EncodableValue("lastmileDelay"), EncodableValue((int)stats.lastmileDelay)},
+                {EncodableValue("txPacketLossRate"), EncodableValue((int)stats.txPacketLossRate)},
+                {EncodableValue("rxPacketLossRate"), EncodableValue((int)stats.rxPacketLossRate)},
+                {EncodableValue("users"), EncodableValue((int)stats.userCount)},
+                {EncodableValue("cpuAppUsage"), EncodableValue((int)stats.cpuAppUsage)},
+                {EncodableValue("cpuTotalUsage"), EncodableValue((int)stats.cpuTotalUsage)},
+            })},
+            });
+    }
+
+    void AgoraRtcEnginePlugin::onRemoteAudioStats(const RemoteAudioStats& stats)
+    {
+        SendEvent("onRemoteAudioStats", EncodableMap{
+            {EncodableValue("stats"), EncodableValue(EncodableMap{
+                {EncodableValue("uid"), EncodableValue((int)stats.uid)},
+                {EncodableValue("quality"), EncodableValue(stats.quality)},
+                {EncodableValue("networkTransportDelay"), EncodableValue(stats.networkTransportDelay)},
+                {EncodableValue("jitterBufferDelay"), EncodableValue(stats.jitterBufferDelay)},
+                {EncodableValue("audioLossRate"), EncodableValue(stats.audioLossRate)},
+                {EncodableValue("numChannels"), EncodableValue(stats.numChannels)},
+                {EncodableValue("receivedSampleRate"), EncodableValue(stats.receivedSampleRate)},
+                {EncodableValue("receivedBitrate"), EncodableValue(stats.receivedBitrate)},
+                {EncodableValue("totalFrozenTime"), EncodableValue(stats.totalFrozenTime)},
+                {EncodableValue("frozenRate"), EncodableValue(stats.frozenRate)},
+            })},
+            });
     }
 #pragma endregion
 }  // namespace

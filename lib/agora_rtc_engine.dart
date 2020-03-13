@@ -39,6 +39,15 @@ class AgoraRtcEngine {
   /// 2. Drop offline: When no data packet of the user or host is received for a certain period of time (20 seconds for the communication profile, and more for the live broadcast profile), the SDK assumes that the user/host drops offline. A poor network connection may lead to false detections, so Agora recommends using the signaling system for reliable offline detection.
   static void Function(int uid, int elapsed) onUserOffline;
 
+  // Statistics Events
+  /// Reports the statistics of the audio stream from each remote user/host.
+  ///
+  /// The SDK triggers this callback once every two seconds for each remote user/host. If a channel includes multiple remote users, the SDK triggers this callback as many times.
+  static void Function(RemoteAudioStats stats) onRemoteAudioStats;
+
+  /// Reports the statistics of the RtcEngine once every two seconds.
+  static void Function(RtcStats stats) onRtcStats;
+
   // Core Methods
   /// Creates an RtcEngine instance.
   ///
@@ -111,6 +120,18 @@ class AgoraRtcEngine {
       case 'onUserOffline':
         if (onUserOffline != null) {
           onUserOffline(map['uid'], map['reason']);
+        }
+        break;
+      case 'onRtcStats':
+        if (onRtcStats != null) {
+          RtcStats stats = RtcStats.fromJson(map['stats']);
+          onRtcStats(stats);
+        }
+        break;
+      case 'onRemoteAudioStats':
+        if (onRemoteAudioStats != null) {
+          RemoteAudioStats stats = RemoteAudioStats.fromJson(map['stats']);
+          onRemoteAudioStats(stats);
         }
         break;
     }
