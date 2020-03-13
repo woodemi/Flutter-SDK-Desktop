@@ -26,4 +26,24 @@ class AgoraRtcEngine {
     await _channel
         .invokeMethod('setChannelProfile', {'profile': profile.index});
   }
+
+  /// Allows a user to join a channel.
+  ///
+  /// Users in the same channel can talk to each other, and multiple users in the same channel can start a group chat. Users with different App IDs cannot call each other.
+  /// You must call the [leaveChannel] method to exit the current call before joining another channel.
+  /// A channel does not accept duplicate uids, such as two users with the same uid. If you set uid as 0, the system automatically assigns a uid.
+  static Future<bool> joinChannel(
+      String token, String channelId, String info, int uid) async {
+    final bool success = await _channel.invokeMethod('joinChannel',
+        {'token': token, 'channelId': channelId, 'info': info, 'uid': uid});
+    return success;
+  }
+
+  /// Allows a user to leave a channel.
+  ///
+  /// If you call the [destroy] method immediately after calling this method, the leaveChannel process interrupts, and the SDK does not trigger the onLeaveChannel callback.
+  static Future<bool> leaveChannel() async {
+    final bool success = await _channel.invokeMethod('leaveChannel');
+    return success;
+  }
 }

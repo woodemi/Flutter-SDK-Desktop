@@ -13,6 +13,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _isInChannel = false;
+
   @override
   void initState() {
     super.initState();
@@ -27,8 +29,16 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Agora Flutter SDK'),
         ),
-        body: Center(
-          child: Text('TODO'),
+        body: Container(
+          child: Column(
+            children: [
+              OutlineButton(
+                child: Text(_isInChannel ? 'Leave Channel' : 'Join Channel',
+                    style: textStyle),
+                onPressed: _toggleChannel,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -39,4 +49,18 @@ class _MyAppState extends State<MyApp> {
 
     AgoraRtcEngine.setChannelProfile(ChannelProfile.Communication);
   }
+
+  void _toggleChannel() {
+    setState(() async {
+      if (_isInChannel) {
+        _isInChannel = false;
+        await AgoraRtcEngine.leaveChannel();
+      } else {
+        _isInChannel = true;
+        await AgoraRtcEngine.joinChannel(null, 'flutter', null, 0);
+      }
+    });
+  }
+
+  static TextStyle textStyle = TextStyle(fontSize: 18, color: Colors.blue);
 }
