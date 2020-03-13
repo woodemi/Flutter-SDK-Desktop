@@ -16,7 +16,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{95E21B2C-C18A-4CED-8509-585CB2570FDE}</ProjectGuid>
+    <ProjectGuid>{4D8908CA-FC73-4EFB-9615-E4D040C053BC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>dev_flutter_plugin</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
