@@ -14,18 +14,28 @@ public class AgoraRtcEnginePlugin: NSObject, FlutterPlugin {
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     let method = call.method
-    let params = call.arguments as! Dictionary<String, Any>
-    print("plugin handleMethodCall: \(method), args: \(params)")
+    let params = call.arguments as? Dictionary<String, Any>
+    print("plugin handleMethodCall: \(method), args: \(String(describing: params))")
 
     switch method {
     case "create":
-      let appId = params["appId"] as! String
+      let appId = params?["appId"] as! String
       agoraRtcEngine = AgoraRtcEngineKit.sharedEngine(withAppId: appId, delegate: self)
       result(nil)
     case "setChannelProfile":
-      let profile = params["profile"] as! Int
+      let profile = params?["profile"] as! Int
       agoraRtcEngine?.setChannelProfile(AgoraChannelProfile(rawValue: profile)!)
       result(nil)
+    case "joinChannel":
+      let token = params?["token"] as? String
+      let channelId = params?["channelId"] as! String
+      let info = params?["info"] as? String
+      let uid = params?["uid"] as! Int
+      agoraRtcEngine?.joinChannel(byToken: token, channelId: channelId, info: info, uid: numericCast(uid), joinSuccess: nil)
+      result(true)
+    case "leaveChannel":
+      let success = agoraRtcEngine?.leaveChannel() == 0
+      result(success)
     default:
       result(FlutterMethodNotImplemented)
     }
