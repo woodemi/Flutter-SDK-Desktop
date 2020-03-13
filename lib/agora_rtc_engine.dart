@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 
 import 'src/base.dart';
@@ -7,6 +9,36 @@ export 'src/base.dart';
 class AgoraRtcEngine {
   static const MethodChannel _channel = const MethodChannel('agora_rtc_engine');
 
+  // FIXME Windows `EventChannel` not implemented yet
+  static final BasicMessageChannel _eventChannel = const BasicMessageChannel(
+      'agora_rtc_engine_message_channel', StandardMessageCodec())
+    ..setMessageHandler((message) {
+      _sinkController.add(message);
+    });
+
+  static StreamSubscription<dynamic> _sink;
+
+  static StreamController<dynamic> _sinkController =
+      StreamController<dynamic>.broadcast();
+
+  /// Reports an error during SDK runtime.
+  ///
+  /// In most cases, the SDK cannot fix the issue and resume running. The SDK requires the app to take action or informs the user about the issue.
+  static void Function(dynamic err) onError;
+
+  /// Occurs when a remote user (Communication)/host (Live Broadcast) joins the channel.
+  ///
+  /// Communication profile: This callback notifies the app when another user joins the channel. If other users are already in the channel, the SDK also reports to the app on the existing users.
+  /// Live-broadcast profile: This callback notifies the app when the host joins the channel. If other hosts are already in the channel, the SDK also reports to the app on the existing hosts. Agora recommends having at most 17 hosts in a channel
+  static void Function(int uid, int elapsed) onUserJoined;
+
+  /// Occurs when a remote user (Communication)/host (Live Broadcast) leaves the channel.
+  ///
+  /// There are two reasons for users to become offline:
+  /// 1. Leave the channel: When the user/host leaves the channel, the user/host sends a goodbye message. When this message is received, the SDK determines that the user/host leaves the channel.
+  /// 2. Drop offline: When no data packet of the user or host is received for a certain period of time (20 seconds for the communication profile, and more for the live broadcast profile), the SDK assumes that the user/host drops offline. A poor network connection may lead to false detections, so Agora recommends using the signaling system for reliable offline detection.
+  static void Function(int uid, int elapsed) onUserOffline;
+
   // Core Methods
   /// Creates an RtcEngine instance.
   ///
@@ -14,6 +46,7 @@ class AgoraRtcEngine {
   /// Only users with the same App ID can join the same channel and call each other.
   static Future<void> create(String appid) async {
     await _channel.invokeMethod('create', {'appId': appid});
+    _addEventChannelHandler();
   }
 
   /// Sets the channel profile.
@@ -32,8 +65,7 @@ class AgoraRtcEngine {
   /// Users in the same channel can talk to each other, and multiple users in the same channel can start a group chat. Users with different App IDs cannot call each other.
   /// You must call the [leaveChannel] method to exit the current call before joining another channel.
   /// A channel does not accept duplicate uids, such as two users with the same uid. If you set uid as 0, the system automatically assigns a uid.
-  static Future<bool> joinChannel(
-      String token, String channelId, String info, int uid) async {
+  static Future<bool> joinChannel(String token, String channelId, String info, int uid) async {
     final bool success = await _channel.invokeMethod('joinChannel',
         {'token': token, 'channelId': channelId, 'info': info, 'uid': uid});
     return success;
@@ -57,5 +89,30 @@ class AgoraRtcEngine {
   /// Receives/Stops receiving all remote audio streams.
   static Future<void> muteAllRemoteAudioStreams(bool muted) async {
     await _channel.invokeMethod('muteAllRemoteAudioStreams', {'muted': muted});
+  }
+
+  static void _addEventChannelHandler() async {
+    _sink = _sinkController.stream.listen(_eventListener, onError: onError);
+  }
+
+  static void _removeEventChannelHandler() async {
+    await _sink.cancel();
+  }
+
+  // CallHandler
+  static void _eventListener(dynamic event) {
+    final Map<dynamic, dynamic> map = event;
+    switch (map['event']) {
+      case 'onUserJoined':
+        if (onUserJoined != null) {
+          onUserJoined(map['uid'], map['elapsed']);
+        }
+        break;
+      case 'onUserOffline':
+        if (onUserOffline != null) {
+          onUserOffline(map['uid'], map['reason']);
+        }
+        break;
+    }
   }
 }

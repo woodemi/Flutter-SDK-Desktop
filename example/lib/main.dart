@@ -14,12 +14,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _isInChannel = false;
+  final _infoStrings = <String>[];
 
   @override
   void initState() {
     super.initState();
 
     _initAgoraRtcEngine();
+    _addAgoraEventHandlers();
   }
 
   @override
@@ -37,6 +39,7 @@ class _MyAppState extends State<MyApp> {
                     style: textStyle),
                 onPressed: _toggleChannel,
               ),
+              Expanded(child: Container(child: _buildInfoList())),
             ],
           ),
         ),
@@ -48,6 +51,22 @@ class _MyAppState extends State<MyApp> {
     AgoraRtcEngine.create(agoraAppId);
 
     AgoraRtcEngine.setChannelProfile(ChannelProfile.Communication);
+  }
+
+  void _addAgoraEventHandlers() {
+    AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
+      setState(() {
+        String info = 'userJoined: ' + uid.toString();
+        _infoStrings.add(info);
+      });
+    };
+
+    AgoraRtcEngine.onUserOffline = (int uid, int reason) {
+      setState(() {
+        String info = 'userOffline: ' + uid.toString();
+        _infoStrings.add(info);
+      });
+    };
   }
 
   void _toggleChannel() {
@@ -63,4 +82,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   static TextStyle textStyle = TextStyle(fontSize: 18, color: Colors.blue);
+
+  Widget _buildInfoList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(8.0),
+      itemExtent: 24,
+      itemBuilder: (context, i) {
+        return ListTile(
+          title: Text(_infoStrings[i]),
+        );
+      },
+      itemCount: _infoStrings.length,
+    );
+  }
 }
