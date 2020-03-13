@@ -19,6 +19,7 @@
 #include <flutter/method_channel.h>
 #include <flutter/basic_message_channel.h>
 #include <flutter/plugin_registrar_windows.h>
+#include <flutter/standard_message_codec.h>
 #include <flutter/standard_method_codec.h>
 
 #include <map>
@@ -47,6 +48,11 @@ namespace {
 
         virtual ~AgoraRtcEnginePlugin();
 
+#pragma region IRtcEngineEventHandler
+    	void onUserJoined(uid_t uid, int elapsed) override;
+        void onUserOffline(uid_t uid, USER_OFFLINE_REASON_TYPE reason) override;
+#pragma endregion
+
     private:
         // Called when a method is called on this plugin's channel from Dart.
         void HandleMethodCall(
@@ -54,6 +60,14 @@ namespace {
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 
         IRtcEngine* agoraRtcEngine;
+
+        std::unique_ptr<flutter::BasicMessageChannel<EncodableValue>> messageChannel;
+
+        void SendEvent(std::string name, EncodableMap params)
+        {
+            params[EncodableValue("event")] = name;
+            messageChannel->Send(EncodableValue(params));
+        }
     };
 
     // static
@@ -71,6 +85,11 @@ namespace {
             [plugin_pointer = plugin.get()](const auto& call, auto result) {
             plugin_pointer->HandleMethodCall(call, std::move(result));
         });
+
+        plugin->messageChannel = std::make_unique<flutter::BasicMessageChannel<EncodableValue>>(
+            registrar->messenger(),
+            "agora_rtc_engine_message_channel",
+            &flutter::StandardMessageCodec::GetInstance());
 
         registrar->AddPlugin(std::move(plugin));
     }
@@ -139,6 +158,24 @@ namespace {
         else
             result->NotImplemented();
     }
+
+#pragma region IRtcEngineEventHandler
+    void AgoraRtcEnginePlugin::onUserJoined(uid_t uid, int elapsed)
+    {
+        SendEvent("onUserJoined", EncodableMap{
+            {EncodableValue("uid"), EncodableValue((int)uid)},
+            {EncodableValue("elapsed"), EncodableValue(elapsed)},
+        });
+    }
+
+    void AgoraRtcEnginePlugin::onUserOffline(uid_t uid, USER_OFFLINE_REASON_TYPE reason)
+    {
+        SendEvent("onUserOffline", EncodableMap{
+            {EncodableValue("uid"), EncodableValue((int)uid)},
+            {EncodableValue("reason"), EncodableValue((int)reason)},
+        });
+    }
+#pragma endregion
 }  // namespace
 
 void AgoraRtcEnginePluginRegisterWithRegistrar(

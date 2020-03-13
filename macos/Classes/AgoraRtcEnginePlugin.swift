@@ -7,10 +7,13 @@ public class AgoraRtcEnginePlugin: NSObject, FlutterPlugin {
     let plugin = AgoraRtcEnginePlugin()
 
     let channel = FlutterMethodChannel(name: "agora_rtc_engine", binaryMessenger: registrar.messenger)
+    plugin.messageChannel = FlutterBasicMessageChannel(name: "agora_rtc_engine_message_channel", binaryMessenger: registrar.messenger)
     registrar.addMethodCallDelegate(plugin, channel: channel)
   }
 
   private var agoraRtcEngine: AgoraRtcEngineKit?
+
+  private var messageChannel: FlutterBasicMessageChannel!
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     let method = call.method
@@ -48,8 +51,20 @@ public class AgoraRtcEnginePlugin: NSObject, FlutterPlugin {
       result(FlutterMethodNotImplemented)
     }
   }
+
+  private func sendEvent(_ name: String, params: Dictionary<String, Any>) {
+    var p = params
+    p["event"] = name
+    messageChannel.sendMessage(p)
+  }
 }
 
 extension AgoraRtcEnginePlugin: AgoraRtcEngineDelegate {
+  public func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinedOfUid uid: UInt, elapsed: Int) {
+    sendEvent("onUserJoined", params: ["uid": uid, "elapsed": elapsed])
+  }
 
+  public func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
+    sendEvent("onUserOffline", params: ["uid": uid, "reason": reason])
+  }
 }
