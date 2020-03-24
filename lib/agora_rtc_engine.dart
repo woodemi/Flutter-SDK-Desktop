@@ -11,15 +11,18 @@ class AgoraRtcEngine {
 
   // FIXME Windows `EventChannel` not implemented yet
   static final BasicMessageChannel _eventChannel = const BasicMessageChannel(
-      'agora_rtc_engine_message_channel', StandardMessageCodec())
-    ..setMessageHandler((message) {
-      _sinkController.add(message);
-    });
+      'agora_rtc_engine_message_channel', StandardMessageCodec());
 
   static StreamSubscription<dynamic> _sink;
 
   static StreamController<dynamic> _sinkController =
       StreamController<dynamic>.broadcast();
+
+  static void init() {
+    _eventChannel.setMessageHandler((message) {
+      _sinkController.add(message);
+    });
+  }
 
   /// Reports an error during SDK runtime.
   ///

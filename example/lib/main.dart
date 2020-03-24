@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 
 import 'AppId.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  AgoraRtcEngine.init();
+  runApp(MyApp());
+}
 
 class MyApp extends StatefulWidget {
   @override
