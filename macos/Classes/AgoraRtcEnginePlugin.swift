@@ -69,7 +69,7 @@ extension AgoraRtcEnginePlugin: AgoraRtcEngineDelegate {
   }
 
   public func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
-    sendEvent("onUserOffline", params: ["uid": uid, "reason": reason])
+    sendEvent("onUserOffline", params: ["uid": uid, "reason": reason.rawValue])
   }
 
   public func rtcEngine(_ engine: AgoraRtcEngineKit, reportRtcStats stats: AgoraChannelStats) {
