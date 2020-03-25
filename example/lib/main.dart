@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'AppId.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   AgoraRtcEngine.init();
   runApp(MyApp());
 }
