@@ -21,6 +21,18 @@ public class AgoraRtcEnginePlugin: NSObject, FlutterPlugin {
     print("plugin handleMethodCall: \(method), args: \(String(describing: params))")
 
     switch method {
+    case "requestAVPermissions":
+      if #available(OSX 10.14, *) {
+        if AVCaptureDevice.authorizationStatus(for: .audio) == .authorized {
+          result(true)
+        } else {
+          AVCaptureDevice.requestAccess(for: .audio) {
+            result($0)
+          }
+        }
+      } else {
+        result(true)
+      }
     case "create":
       let appId = params?["appId"] as! String
       agoraRtcEngine = AgoraRtcEngineKit.sharedEngine(withAppId: appId, delegate: self)
