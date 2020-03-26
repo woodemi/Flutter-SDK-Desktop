@@ -140,7 +140,13 @@ namespace {
         auto params = method_call.arguments() != nullptr ? method_call.arguments()->MapValue() : EncodableMap();
         DebugPrintLine("plugin HandleMethodCall " + methodName + ", args: " + std::to_string(params.size()));
 
-        if ("create" == methodName)
+        if ("requestAVPermissions" == methodName)
+        {
+	        // ignore macOS method
+            auto ret = EncodableValue(true);
+            result->Success(&ret);
+        }
+        else if ("create" == methodName)
         {
             auto appId = params[EncodableValue("appId")].StringValue();
             agoraRtcEngine = createAgoraRtcEngine();
