@@ -64,6 +64,14 @@ public class AgoraRtcEnginePlugin: NSObject, FlutterPlugin {
 }
 
 extension AgoraRtcEnginePlugin: AgoraRtcEngineDelegate {
+  public func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinChannel channel: String, withUid uid: UInt, elapsed: Int) {
+    sendEvent("onJoinChannelSuccess", params: ["channel": channel, "uid": uid, "elapsed": elapsed])
+  }
+
+  public func rtcEngine(_ engine: AgoraRtcEngineKit, didLeaveChannelWith stats: AgoraChannelStats) {
+    sendEvent("onLeaveChannel", params: ["stats": stats.toDictionary()])
+  }
+
   public func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinedOfUid uid: UInt, elapsed: Int) {
     sendEvent("onUserJoined", params: ["uid": uid, "elapsed": elapsed])
   }
@@ -73,29 +81,7 @@ extension AgoraRtcEnginePlugin: AgoraRtcEngineDelegate {
   }
 
   public func rtcEngine(_ engine: AgoraRtcEngineKit, reportRtcStats stats: AgoraChannelStats) {
-    sendEvent("onRtcStats", params: [
-      "stats": [
-        "totalDuration": stats.duration,
-        "txBytes": stats.txBytes,
-        "rxBytes": stats.rxBytes,
-        "txAudioBytes": stats.txAudioBytes,
-        "txVideoBytes": stats.txVideoBytes,
-        "rxAudioBytes": stats.rxAudioBytes,
-        "rxVideoBytes": stats.rxVideoBytes,
-        "txKBitrate": stats.txKBitrate,
-        "rxKBitrate": stats.rxKBitrate,
-        "txAudioKBitrate": stats.txAudioKBitrate,
-        "rxAudioKBitrate": stats.rxAudioKBitrate,
-        "txVideoKBitrate": stats.txVideoKBitrate,
-        "rxVideoKBitrate": stats.rxVideoKBitrate,
-        "lastmileDelay": stats.lastmileDelay,
-        "txPacketLossRate": stats.txPacketLossRate,
-        "rxPacketLossRate": stats.rxPacketLossRate,
-        "users": stats.userCount,
-        "cpuAppUsage": stats.cpuAppUsage,
-        "cpuTotalUsage": stats.cpuTotalUsage,
-      ]
-    ])
+    sendEvent("onRtcStats", params: ["stats": stats.toDictionary()])
   }
 
   public func rtcEngine(_ engine: AgoraRtcEngineKit, remoteAudioStats stats: AgoraRtcRemoteAudioStats) {
@@ -113,5 +99,31 @@ extension AgoraRtcEnginePlugin: AgoraRtcEngineDelegate {
         "frozenRate": stats.frozenRate,
       ]
     ])
+  }
+}
+
+extension AgoraChannelStats {
+  func toDictionary() -> [String: Any] {
+    [
+      "totalDuration": duration,
+      "txBytes": txBytes,
+      "rxBytes": rxBytes,
+      "txAudioBytes": txAudioBytes,
+      "txVideoBytes": txVideoBytes,
+      "rxAudioBytes": rxAudioBytes,
+      "rxVideoBytes": rxVideoBytes,
+      "txKBitrate": txKBitrate,
+      "rxKBitrate": rxKBitrate,
+      "txAudioKBitrate": txAudioKBitrate,
+      "rxAudioKBitrate": rxAudioKBitrate,
+      "txVideoKBitrate": txVideoKBitrate,
+      "rxVideoKBitrate": rxVideoKBitrate,
+      "lastmileDelay": lastmileDelay,
+      "txPacketLossRate": txPacketLossRate,
+      "rxPacketLossRate": rxPacketLossRate,
+      "users": userCount,
+      "cpuAppUsage": cpuAppUsage,
+      "cpuTotalUsage": cpuTotalUsage,
+    ]
   }
 }
