@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/services.dart';
 
@@ -28,6 +29,18 @@ class AgoraRtcEngine {
   ///
   /// In most cases, the SDK cannot fix the issue and resume running. The SDK requires the app to take action or informs the user about the issue.
   static void Function(dynamic err) onError;
+
+  /// Occurs when a user joins a specified channel.
+  ///
+  /// The channel name assignment is based on channelName specified in the [joinChannel] method.
+  /// If the uid is not specified when [joinChannel] is called, the server automatically assigns a uid.
+  static void Function(String channel, int uid, int elapsed)
+      onJoinChannelSuccess;
+
+  /// Occurs when a user leaves the channel.
+  ///
+  /// When the app calls the [leaveChannel] method, the SDK uses this callback to notify the app when the user leaves the channel.
+  static VoidCallback onLeaveChannel;
 
   /// Occurs when a remote user (Communication)/host (Live Broadcast) joins the channel.
   ///
@@ -124,6 +137,16 @@ class AgoraRtcEngine {
   static void _eventListener(dynamic event) {
     final Map<dynamic, dynamic> map = event;
     switch (map['event']) {
+      case 'onJoinChannelSuccess':
+        if (onJoinChannelSuccess != null) {
+          onJoinChannelSuccess(map['channel'], map['uid'], map['elapsed']);
+        }
+        break;
+      case 'onLeaveChannel':
+        if (onLeaveChannel != null) {
+          onLeaveChannel();
+        }
+        break;
       case 'onUserJoined':
         if (onUserJoined != null) {
           onUserJoined(map['uid'], map['elapsed']);

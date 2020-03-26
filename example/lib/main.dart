@@ -58,6 +58,20 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _addAgoraEventHandlers() {
+    AgoraRtcEngine.onJoinChannelSuccess =
+        (String channel, int uid, int elapsed) {
+      setState(() {
+        String info = 'onJoinChannel: ' + channel + ', uid: ' + uid.toString();
+        _infoStrings.add(info);
+      });
+    };
+
+    AgoraRtcEngine.onLeaveChannel = () {
+      setState(() {
+        _infoStrings.add('onLeaveChannel');
+      });
+    };
+
     AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
       setState(() {
         String info = 'userJoined: ' + uid.toString();

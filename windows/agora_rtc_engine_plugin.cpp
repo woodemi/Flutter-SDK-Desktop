@@ -39,6 +39,31 @@ namespace {
         OutputDebugString((wstring + L"\n").c_str());
     }
 
+    EncodableMap toMap(const RtcStats& stats)
+    {
+        return EncodableMap{
+            {EncodableValue("totalDuration"), EncodableValue((int)stats.duration)},
+            {EncodableValue("txBytes"), EncodableValue((int)stats.txBytes)},
+            {EncodableValue("rxBytes"), EncodableValue((int)stats.rxBytes)},
+            {EncodableValue("txAudioBytes"), EncodableValue((int)stats.txAudioBytes)},
+            {EncodableValue("txVideoBytes"), EncodableValue((int)stats.txVideoBytes)},
+            {EncodableValue("rxAudioBytes"), EncodableValue((int)stats.rxAudioBytes)},
+            {EncodableValue("rxVideoBytes"), EncodableValue((int)stats.rxVideoBytes)},
+            {EncodableValue("txKBitrate"), EncodableValue((int)stats.txKBitRate)},
+            {EncodableValue("rxKBitrate"), EncodableValue((int)stats.rxKBitRate)},
+            {EncodableValue("txAudioKBitrate"), EncodableValue((int)stats.txAudioKBitRate)},
+            {EncodableValue("rxAudioKBitrate"), EncodableValue((int)stats.rxAudioKBitRate)},
+            {EncodableValue("txVideoKBitrate"), EncodableValue((int)stats.txVideoKBitRate)},
+            {EncodableValue("rxVideoKBitrate"), EncodableValue((int)stats.rxVideoKBitRate)},
+            {EncodableValue("lastmileDelay"), EncodableValue((int)stats.lastmileDelay)},
+            {EncodableValue("txPacketLossRate"), EncodableValue((int)stats.txPacketLossRate)},
+            {EncodableValue("rxPacketLossRate"), EncodableValue((int)stats.rxPacketLossRate)},
+            {EncodableValue("users"), EncodableValue((int)stats.userCount)},
+            {EncodableValue("cpuAppUsage"), EncodableValue((int)stats.cpuAppUsage)},
+            {EncodableValue("cpuTotalUsage"), EncodableValue((int)stats.cpuTotalUsage)},
+        };
+    }
+
     class AgoraRtcEnginePlugin : public flutter::Plugin, IRtcEngineEventHandler
     {
     public:
@@ -49,6 +74,8 @@ namespace {
         virtual ~AgoraRtcEnginePlugin();
 
 #pragma region IRtcEngineEventHandler
+    	void onJoinChannelSuccess(const char* channel, uid_t uid, int elapsed) override;
+    	void onLeaveChannel(const RtcStats& stats) override;
     	void onUserJoined(uid_t uid, int elapsed) override;
         void onUserOffline(uid_t uid, USER_OFFLINE_REASON_TYPE reason) override;
         void onRtcStats(const RtcStats& stats) override;
@@ -168,6 +195,22 @@ namespace {
     }
 
 #pragma region IRtcEngineEventHandler
+    void AgoraRtcEnginePlugin::onJoinChannelSuccess(const char* channel, uid_t uid, int elapsed)
+    {
+        SendEvent("onJoinChannelSuccess", EncodableMap{
+            {EncodableValue("channel"), EncodableValue(channel)},
+            {EncodableValue("uid"), EncodableValue((int)uid)},
+            {EncodableValue("elapsed"), EncodableValue(elapsed)},
+        });
+    }
+
+    void AgoraRtcEnginePlugin::onLeaveChannel(const RtcStats& stats)
+    {
+        SendEvent("onLeaveChannel", EncodableMap{
+            {EncodableValue("stats"), EncodableValue(toMap(stats))},
+        });
+    }
+
     void AgoraRtcEnginePlugin::onUserJoined(uid_t uid, int elapsed)
     {
         SendEvent("onUserJoined", EncodableMap{
@@ -187,28 +230,8 @@ namespace {
     void AgoraRtcEnginePlugin::onRtcStats(const RtcStats& stats)
     {
         SendEvent("onRtcStats", EncodableMap{
-            {EncodableValue("stats"), EncodableValue(EncodableMap{
-                {EncodableValue("totalDuration"), EncodableValue((int)stats.duration)},
-                {EncodableValue("txBytes"), EncodableValue((int)stats.txBytes)},
-                {EncodableValue("rxBytes"), EncodableValue((int)stats.rxBytes)},
-                {EncodableValue("txAudioBytes"), EncodableValue((int)stats.txAudioBytes)},
-                {EncodableValue("txVideoBytes"), EncodableValue((int)stats.txVideoBytes)},
-                {EncodableValue("rxAudioBytes"), EncodableValue((int)stats.rxAudioBytes)},
-                {EncodableValue("rxVideoBytes"), EncodableValue((int)stats.rxVideoBytes)},
-                {EncodableValue("txKBitrate"), EncodableValue((int)stats.txKBitRate)},
-                {EncodableValue("rxKBitrate"), EncodableValue((int)stats.rxKBitRate)},
-                {EncodableValue("txAudioKBitrate"), EncodableValue((int)stats.txAudioKBitRate)},
-                {EncodableValue("rxAudioKBitrate"), EncodableValue((int)stats.rxAudioKBitRate)},
-                {EncodableValue("txVideoKBitrate"), EncodableValue((int)stats.txVideoKBitRate)},
-                {EncodableValue("rxVideoKBitrate"), EncodableValue((int)stats.rxVideoKBitRate)},
-                {EncodableValue("lastmileDelay"), EncodableValue((int)stats.lastmileDelay)},
-                {EncodableValue("txPacketLossRate"), EncodableValue((int)stats.txPacketLossRate)},
-                {EncodableValue("rxPacketLossRate"), EncodableValue((int)stats.rxPacketLossRate)},
-                {EncodableValue("users"), EncodableValue((int)stats.userCount)},
-                {EncodableValue("cpuAppUsage"), EncodableValue((int)stats.cpuAppUsage)},
-                {EncodableValue("cpuTotalUsage"), EncodableValue((int)stats.cpuTotalUsage)},
-            })},
-            });
+            {EncodableValue("stats"), EncodableValue(toMap(stats))},
+        });
     }
 
     void AgoraRtcEnginePlugin::onRemoteAudioStats(const RemoteAudioStats& stats)
