@@ -137,7 +137,7 @@ namespace {
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result)
     {
         auto methodName = method_call.method_name();
-        auto params = method_call.arguments() != nullptr ? method_call.arguments()->MapValue() : EncodableMap();
+        auto params = method_call.arguments()->IsNull() ? EncodableMap() : method_call.arguments()->MapValue();
         DebugPrintLine("plugin HandleMethodCall " + methodName + ", args: " + std::to_string(params.size()));
 
         if ("create" == methodName)
@@ -164,9 +164,9 @@ namespace {
         }
         else if ("joinChannel" == methodName)
         {
-            auto token = params.count(EncodableValue("token")) > 0 ? params[EncodableValue("token")].StringValue() : "";
+            auto token = params[EncodableValue("token")].IsNull() ? "" : params[EncodableValue("token")].StringValue();
             auto channelId = params[EncodableValue("channelId")].StringValue();
-            auto info = params.count(EncodableValue("info")) > 0 ? params[EncodableValue("info")].StringValue() : "";
+            auto info = params[EncodableValue("info")].IsNull() ? "" : params[EncodableValue("info")].StringValue();
             auto uid = params[EncodableValue("uid")].IntValue();
             agoraRtcEngine->joinChannel(token.c_str(), channelId.c_str(), info.c_str(), uid);
             auto ret = EncodableValue(true);
