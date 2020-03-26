@@ -25,6 +25,9 @@ class AgoraRtcEngine {
     });
   }
 
+  static Future<bool> requestAVPermissions() =>
+      _channel.invokeMethod('requestAVPermissions');
+
   /// Reports an error during SDK runtime.
   ///
   /// In most cases, the SDK cannot fix the issue and resume running. The SDK requires the app to take action or informs the user about the issue.

@@ -34,6 +34,14 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Agora Flutter SDK'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('requestAVPermissions'),
+              onPressed: () {
+                AgoraRtcEngine.requestAVPermissions();
+              },
+            )
+          ],
         ),
         body: Container(
           child: Column(
