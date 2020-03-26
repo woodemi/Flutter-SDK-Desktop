@@ -73,16 +73,14 @@ class _MyAppState extends State<MyApp> {
     };
   }
 
-  void _toggleChannel() {
-    setState(() async {
-      if (_isInChannel) {
-        _isInChannel = false;
-        await AgoraRtcEngine.leaveChannel();
-      } else {
-        _isInChannel = true;
-        await AgoraRtcEngine.joinChannel(null, 'flutter', null, 0);
-      }
-    });
+  void _toggleChannel() async {
+    if (_isInChannel) {
+      await AgoraRtcEngine.leaveChannel();
+      setState(() => _isInChannel = false);
+    } else {
+      await AgoraRtcEngine.joinChannel(null, 'flutter', null, 0);
+      setState(() => _isInChannel = true);
+    }
   }
 
   static TextStyle textStyle = TextStyle(fontSize: 18, color: Colors.blue);
