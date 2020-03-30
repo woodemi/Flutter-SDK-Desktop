@@ -59,8 +59,8 @@ namespace {
             {EncodableValue("txPacketLossRate"), EncodableValue((int)stats.txPacketLossRate)},
             {EncodableValue("rxPacketLossRate"), EncodableValue((int)stats.rxPacketLossRate)},
             {EncodableValue("users"), EncodableValue((int)stats.userCount)},
-            {EncodableValue("cpuAppUsage"), EncodableValue((int)stats.cpuAppUsage)},
-            {EncodableValue("cpuTotalUsage"), EncodableValue((int)stats.cpuTotalUsage)},
+            {EncodableValue("cpuAppUsage"), EncodableValue(stats.cpuAppUsage)},
+            {EncodableValue("cpuTotalUsage"), EncodableValue(stats.cpuTotalUsage)},
         };
     }
 
