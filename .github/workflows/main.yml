@@ -12,30 +12,20 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: subosito/flutter-action@v1.3.0
+      - uses: subosito/flutter-action@v1.4.0
         with:
-          channel: 'beta'
+          channel: 'dev'
       - run: |
-          cd $(dirname $(which flutter)) && cd ..
-          git clean -xdf; git fetch; git checkout -b dev
-          flutter config --enable-macos-desktop
-          cd -
-      - run: cd example && flutter packages get && flutter build macos -v
+          flutter config --enable-macos-desktop && cd example
+          flutter packages get && flutter build macos
 
   build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: subosito/flutter-action@v1.3.0
+      - uses: subosito/flutter-action@v1.4.0
         with:
-          channel: 'beta'
+          channel: 'dev'
       - run: |
-          Get-Command flutter | Get-Item | Split-Path | Set-Location; Set-Location ..
-          git clean -xdf; git fetch; git checkout -b master
-          flutter config --enable-windows-desktop
-          cd -
-      - run: cd example; flutter packages get && flutter build windows
-        continue-on-error: true
-      - uses: warrenbuckley/Setup-Nuget@v1
-      - run: cd example\windows; nuget restore; cd -
-      - run: cd example; flutter packages get; flutter build windows -v
+          flutter config --enable-windows-desktop && cd example
+          flutter packages get && flutter build windows
