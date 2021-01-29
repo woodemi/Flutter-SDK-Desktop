@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "agora_rtc_engine_plugin.h"
+#include "include/agora_rtc_engine/agora_rtc_engine_plugin.h"
 
 // This must be included before VersionHelpers.h.
 #include <windows.h>
@@ -42,25 +42,25 @@ namespace {
     EncodableMap toMap(const RtcStats& stats)
     {
         return EncodableMap{
-            {EncodableValue("totalDuration"), EncodableValue((int)stats.duration)},
-            {EncodableValue("txBytes"), EncodableValue((int)stats.txBytes)},
-            {EncodableValue("rxBytes"), EncodableValue((int)stats.rxBytes)},
-            {EncodableValue("txAudioBytes"), EncodableValue((int)stats.txAudioBytes)},
-            {EncodableValue("txVideoBytes"), EncodableValue((int)stats.txVideoBytes)},
-            {EncodableValue("rxAudioBytes"), EncodableValue((int)stats.rxAudioBytes)},
-            {EncodableValue("rxVideoBytes"), EncodableValue((int)stats.rxVideoBytes)},
-            {EncodableValue("txKBitrate"), EncodableValue((int)stats.txKBitRate)},
-            {EncodableValue("rxKBitrate"), EncodableValue((int)stats.rxKBitRate)},
-            {EncodableValue("txAudioKBitrate"), EncodableValue((int)stats.txAudioKBitRate)},
-            {EncodableValue("rxAudioKBitrate"), EncodableValue((int)stats.rxAudioKBitRate)},
-            {EncodableValue("txVideoKBitrate"), EncodableValue((int)stats.txVideoKBitRate)},
-            {EncodableValue("rxVideoKBitrate"), EncodableValue((int)stats.rxVideoKBitRate)},
-            {EncodableValue("lastmileDelay"), EncodableValue((int)stats.lastmileDelay)},
-            {EncodableValue("txPacketLossRate"), EncodableValue((int)stats.txPacketLossRate)},
-            {EncodableValue("rxPacketLossRate"), EncodableValue((int)stats.rxPacketLossRate)},
-            {EncodableValue("users"), EncodableValue((int)stats.userCount)},
-            {EncodableValue("cpuAppUsage"), EncodableValue(stats.cpuAppUsage)},
-            {EncodableValue("cpuTotalUsage"), EncodableValue(stats.cpuTotalUsage)},
+            {"totalDuration", (int)stats.duration},
+            {"txBytes", (int)stats.txBytes},
+            {"rxBytes", (int)stats.rxBytes},
+            {"txAudioBytes", (int)stats.txAudioBytes},
+            {"txVideoBytes", (int)stats.txVideoBytes},
+            {"rxAudioBytes", (int)stats.rxAudioBytes},
+            {"rxVideoBytes", (int)stats.rxVideoBytes},
+            {"txKBitrate", (int)stats.txKBitRate},
+            {"rxKBitrate", (int)stats.rxKBitRate},
+            {"txAudioKBitrate", (int)stats.txAudioKBitRate},
+            {"rxAudioKBitrate", (int)stats.rxAudioKBitRate},
+            {"txVideoKBitrate", (int)stats.txVideoKBitRate},
+            {"rxVideoKBitrate", (int)stats.rxVideoKBitRate},
+            {"lastmileDelay", (int)stats.lastmileDelay},
+            {"txPacketLossRate", (int)stats.txPacketLossRate},
+            {"rxPacketLossRate", (int)stats.rxPacketLossRate},
+            {"users", (int)stats.userCount},
+            {"cpuAppUsage", stats.cpuAppUsage},
+            {"cpuTotalUsage", stats.cpuTotalUsage},
         };
     }
 
@@ -95,7 +95,7 @@ namespace {
         void SendEvent(std::string name, EncodableMap params)
         {
             params[EncodableValue("event")] = name;
-            messageChannel->Send(EncodableValue(params));
+            messageChannel->Send(params);
         }
     };
 
@@ -137,18 +137,17 @@ namespace {
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result)
     {
         auto methodName = method_call.method_name();
-        auto params = method_call.arguments()->IsNull() ? EncodableMap() : method_call.arguments()->MapValue();
+        auto params = method_call.arguments()->IsNull() ? EncodableMap() : std::get<EncodableMap>(*method_call.arguments());
         DebugPrintLine("plugin HandleMethodCall " + methodName + ", args: " + std::to_string(params.size()));
 
         if ("requestAVPermissions" == methodName)
         {
 	        // ignore macOS method
-            auto ret = EncodableValue(true);
-            result->Success(&ret);
+            result->Success(EncodableValue(true));
         }
         else if ("create" == methodName)
         {
-            auto appId = params[EncodableValue("appId")].StringValue();
+            auto appId = std::get<std::string>(params[EncodableValue("appId")]);
             agoraRtcEngine = createAgoraRtcEngine();
             RtcEngineContext ctx;
             ctx.eventHandler = this;
@@ -164,35 +163,33 @@ namespace {
         }
         else if ("setChannelProfile" == methodName)
         {
-            auto profile = params[EncodableValue("profile")].IntValue();
+            auto profile = std::get<int>(params[EncodableValue("profile")]);
             agoraRtcEngine->setChannelProfile(static_cast<CHANNEL_PROFILE_TYPE>(profile));
             result->Success(nullptr);
         }
         else if ("joinChannel" == methodName)
         {
-            auto token = params[EncodableValue("token")].IsNull() ? "" : params[EncodableValue("token")].StringValue();
-            auto channelId = params[EncodableValue("channelId")].StringValue();
-            auto info = params[EncodableValue("info")].IsNull() ? "" : params[EncodableValue("info")].StringValue();
-            auto uid = params[EncodableValue("uid")].IntValue();
+            auto token = params[EncodableValue("token")].IsNull() ? "" : std::get<std::string>(params[EncodableValue("token")]);
+            auto channelId = std::get<std::string>(params[EncodableValue("channelId")]);
+            auto info = params[EncodableValue("info")].IsNull() ? "" : std::get<std::string>(params[EncodableValue("info")]);
+            auto uid = std::get<int>(params[EncodableValue("uid")]);
             agoraRtcEngine->joinChannel(token.c_str(), channelId.c_str(), info.c_str(), uid);
-            auto ret = EncodableValue(true);
-            result->Success(&ret);
+            result->Success(EncodableValue(true));
         }
         else if ("leaveChannel" == methodName)
         {
             auto success = agoraRtcEngine->leaveChannel() == 0;
-            auto ret = EncodableValue(success);
-            result->Success(&ret);
+            result->Success(EncodableValue(success));
         }
         else if ("muteLocalAudioStream" == methodName)
         {
-            auto muted = params[EncodableValue("muted")].BoolValue();
+            auto muted = std::get<bool>(params[EncodableValue("muted")]);
             agoraRtcEngine->muteLocalAudioStream(muted);
             result->Success(nullptr);
         }
         else if ("muteAllRemoteAudioStreams" == methodName)
         {
-            auto muted = params[EncodableValue("muted")].BoolValue();
+            auto muted = std::get<bool>(params[EncodableValue("muted")]);
             agoraRtcEngine->muteAllRemoteAudioStreams(muted);
             result->Success(nullptr);
         }
@@ -204,58 +201,58 @@ namespace {
     void AgoraRtcEnginePlugin::onJoinChannelSuccess(const char* channel, uid_t uid, int elapsed)
     {
         SendEvent("onJoinChannelSuccess", EncodableMap{
-            {EncodableValue("channel"), EncodableValue(channel)},
-            {EncodableValue("uid"), EncodableValue((int)uid)},
-            {EncodableValue("elapsed"), EncodableValue(elapsed)},
+            {"channel", channel},
+            {"uid", (int)uid},
+            {"elapsed", elapsed},
         });
     }
 
     void AgoraRtcEnginePlugin::onLeaveChannel(const RtcStats& stats)
     {
         SendEvent("onLeaveChannel", EncodableMap{
-            {EncodableValue("stats"), EncodableValue(toMap(stats))},
+            {"stats", toMap(stats)},
         });
     }
 
     void AgoraRtcEnginePlugin::onUserJoined(uid_t uid, int elapsed)
     {
         SendEvent("onUserJoined", EncodableMap{
-            {EncodableValue("uid"), EncodableValue((int)uid)},
-            {EncodableValue("elapsed"), EncodableValue(elapsed)},
+            {"uid", (int)uid},
+            {"elapsed", elapsed},
         });
     }
 
     void AgoraRtcEnginePlugin::onUserOffline(uid_t uid, USER_OFFLINE_REASON_TYPE reason)
     {
         SendEvent("onUserOffline", EncodableMap{
-            {EncodableValue("uid"), EncodableValue((int)uid)},
-            {EncodableValue("reason"), EncodableValue((int)reason)},
+            {"uid", (int)uid},
+            {"reason", (int)reason},
         });
     }
 
     void AgoraRtcEnginePlugin::onRtcStats(const RtcStats& stats)
     {
         SendEvent("onRtcStats", EncodableMap{
-            {EncodableValue("stats"), EncodableValue(toMap(stats))},
+            {"stats", toMap(stats)},
         });
     }
 
     void AgoraRtcEnginePlugin::onRemoteAudioStats(const RemoteAudioStats& stats)
     {
         SendEvent("onRemoteAudioStats", EncodableMap{
-            {EncodableValue("stats"), EncodableValue(EncodableMap{
-                {EncodableValue("uid"), EncodableValue((int)stats.uid)},
-                {EncodableValue("quality"), EncodableValue(stats.quality)},
-                {EncodableValue("networkTransportDelay"), EncodableValue(stats.networkTransportDelay)},
-                {EncodableValue("jitterBufferDelay"), EncodableValue(stats.jitterBufferDelay)},
-                {EncodableValue("audioLossRate"), EncodableValue(stats.audioLossRate)},
-                {EncodableValue("numChannels"), EncodableValue(stats.numChannels)},
-                {EncodableValue("receivedSampleRate"), EncodableValue(stats.receivedSampleRate)},
-                {EncodableValue("receivedBitrate"), EncodableValue(stats.receivedBitrate)},
-                {EncodableValue("totalFrozenTime"), EncodableValue(stats.totalFrozenTime)},
-                {EncodableValue("frozenRate"), EncodableValue(stats.frozenRate)},
-            })},
-            });
+            {"stats", EncodableMap{
+                {"uid", (int)stats.uid},
+                {"quality", stats.quality},
+                {"networkTransportDelay", stats.networkTransportDelay},
+                {"jitterBufferDelay", stats.jitterBufferDelay},
+                {"audioLossRate", stats.audioLossRate},
+                {"numChannels", stats.numChannels},
+                {"receivedSampleRate", stats.receivedSampleRate},
+                {"receivedBitrate", stats.receivedBitrate},
+                {"totalFrozenTime", stats.totalFrozenTime},
+                {"frozenRate", stats.frozenRate},
+            }},
+        });
     }
 #pragma endregion
 }  // namespace
