@@ -116,6 +116,33 @@ class AgoraRtcEngine {
     return success;
   }
 
+  static Future<void> enableVideo() async {
+    await _channel.invokeMethod('enableVideo');
+  }
+
+  static Future<void> disableVideo() async {
+    await _channel.invokeMethod('disableVideo');
+  }
+
+  static Future<int> setupLocalTexture() async {
+    final int textureId = await _channel.invokeMethod('setupLocalTexture');
+    return textureId;
+  }
+
+  static Future<void> disposeLocalTexture(int textureId) async {
+    await _channel.invokeMethod('disposeLocalTexture', {
+      'textureId': textureId,
+    });
+  }
+
+  static Future<void> startPreview() async {
+    await _channel.invokeMethod('startPreview');
+  }
+
+  static Future<void> stopPreview() async {
+    await _channel.invokeMethod('stopPreview');
+  }
+
   /// Sends/Stops sending the local audio stream.
   ///
   /// When muted is set as true, this method does not disable the microphone and thus does not affect any ongoing recording.

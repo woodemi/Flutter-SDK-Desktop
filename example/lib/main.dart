@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
 import 'package:flutter/material.dart';
 
 import 'AppId.dart';
@@ -49,9 +50,16 @@ class _MyAppState extends State<MyApp> {
               OutlineButton(
                 child: Text(_isInChannel ? 'Leave Channel' : 'Join Channel',
                     style: textStyle),
-                onPressed: _toggleChannel,
+                onPressed: _toggleTexture,
               ),
-              Expanded(child: Container(child: _buildInfoList())),
+              Expanded(
+                child: Stack(
+                  children: [
+                    _renderVideo(),
+                    Container(child: _buildInfoList()),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -103,6 +111,28 @@ class _MyAppState extends State<MyApp> {
       await AgoraRtcEngine.joinChannel(null, 'flutter', null, 0);
       setState(() => _isInChannel = true);
     }
+  }
+
+  void _toggleTexture() async {
+    if (_textureId == null) {
+      await AgoraRtcEngine.enableVideo();
+      var textureId = await AgoraRtcEngine.setupLocalTexture();
+      setState(() => _textureId = textureId);
+      AgoraRtcEngine.startPreview();
+    } else {
+      await AgoraRtcEngine.disposeLocalTexture(_textureId);
+      setState(() => _textureId = null);
+      AgoraRtcEngine.stopPreview();
+      await AgoraRtcEngine.disableVideo();
+    }
+  }
+
+  int _textureId;
+
+  Widget _renderVideo() {
+    return _textureId != null
+        ? RtcLocalView.SurfaceView(_textureId)
+        : Container();
   }
 
   static TextStyle textStyle = TextStyle(fontSize: 18, color: Colors.blue);
